@@ -7,7 +7,7 @@ Reference: Project Implementation Plan Appendix A
 
 from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class PreprocessedLogRecord(BaseModel):
@@ -67,6 +67,6 @@ class FeedbackRecord(BaseModel):
         description="Administrator verdict: confirmed anomaly or false positive dismissal"
     )
     timestamp: str = Field(
-        default_factory=lambda: datetime.utcnow().isoformat() + "Z",
+        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
         description="ISO 8601 timestamp when feedback was recorded"
     )

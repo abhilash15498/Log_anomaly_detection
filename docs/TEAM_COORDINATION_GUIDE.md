@@ -12,8 +12,8 @@
 | Member | Role | USN | Core Ownership |
 |---|---|---|---|
 | **Member 1** | **Data & Preprocessing Lead** | `1BY24AI002` (Abhilash Hiremath) | Log dataset acquisition, live fault injection, Drain3 parsing, embedding vectors |
-| **Member 2** | **ML Detection Lead** | `1BY24AI037` (Deepak Suresh Naik) | Isolation Forest baseline, PyTorch Autoencoder, anomaly scoring & evaluation |
-| **Member 3** | **LLM / RAG Lead** | `1BY24AI157` (Shrikrishna R Prabhu) | Context aggregation, prompt engineering, LLM integration (Ollama/API), RAG |
+| **Member 2** | **ML Detection Lead** |  `1BY24AI157` (Shrikrishna R Prabhu) | Isolation Forest baseline, PyTorch Autoencoder, anomaly scoring & evaluation |
+| **Member 3** | **LLM / RAG Lead** |`1BY24AI037` (Deepak Suresh Naik) | Context aggregation, prompt engineering, LLM integration (Ollama/API), RAG |
 | **Member 4** | **Integration & Dashboard Lead** | `1BY24AI191` (Vishnu Karanth A) | Streamlit dashboard, feedback loop wiring, end-to-end integration tests |
 
 ---
@@ -30,67 +30,51 @@ Imagine you are building a **smart security scout and expert doctor** for comput
 ## 🗺️ Step-by-Step Implementation Roadmap
 
 ```text
-[ Raw Logs ] ─────────────┐
-                          ├──> [ Step 2: Vectorization ] ──> [ Step 3: ML Detector ]
-[ System Metrics ] ───────┘    Text Embedding (384) +        (Isolation Forest / Autoencoder)
-(CPU, RAM, Disk)               Metrics Vector (e.g. 2-3)                    │
-      │                        (Member 1)                                   │
-      │                                                                     │ (Only if Anomaly!)
-      │ (Metrics snapshot at anomaly timestamp)                             v
-      v                                                      +───────────────────────────────+
-+──────────────────────────────────────────────────────────> | Step 4: LLM Reasoning Layer   |
-                                                             | • Surrounding Logs Context    |
-                                                             | • System Metrics Snapshot     |
-                                                             | (Member 3)                    |
-                                                             +───────────────────────────────+
-                                                                            │
++-----------------------+     +--------------------------+     +------------------------+
+| Step 1: Raw Logs      | --> | Step 2: Vectorization    | --> | Step 3: ML Detector    |
+| (Ingest & Faults)     |     | (sentence-transformers)  |     | (Isolation Forest/AE)  |
+| Owned by: Member 1    |     | Owned by: Member 1       |     | Owned by: Member 2     |
++-----------------------+     +--------------------------+     +------------------------+
+                                                                            |
+                                                                   (Only if Anomaly!)
                                                                             v
-+──────────────────────────+     +───────────────────────────────────────────────────────────+
-| Step 6: Full Live Demo   | <-- | Step 5: Web Dashboard & Feedback Loop                     |
-| (Fault Injection Test)   |     | (Streamlit: Live Logs, Metrics Charts, LLM Diagnosis)     |
-| (All Members, M4 leads)  |     | (Member 4)                                                |
-+──────────────────────────+     +───────────────────────────────────────────────────────────+
++-----------------------+     +--------------------------+     +------------------------+
+| Step 6: Full Demo     | <-- | Step 5: Web Dashboard    | <-- | Step 4: LLM Diagnosis |
+| (Fault Injection Test)|     | (Streamlit UI + Feedback)|     | (Context Window + Prompt)
+| Owned by: All (M4 lead|     | Owned by: Member 4       |     | Owned by: Member 3     |
++-----------------------+     +--------------------------+     +------------------------+
 ```
 
 ---
 
-### Step 1: Dataset Acquisition, Metrics Sampling & Fault-Injection Setup
+### Step 1: Dataset Acquisition & Fault-Injection Setup
 * **Lead**: Member 1
-* **Objective**: Prepare raw logs, collect system metrics, and create a live demo environment.
+* **Objective**: Prepare raw logs and create a live demo environment.
 * **Tasks**:
   1. Download a subset of **LogHub HDFS_v1** (or BGL) logs and store raw samples in `data/raw/`.
-  2. In the live demo environment, use Python's **`psutil`** library to continuously sample machine metrics alongside logs:
-     * CPU utilization percentage (`psutil.cpu_percent()`)
-     * Memory usage percentage (`psutil.virtual_memory().percent`)
-     * Disk I/O & Network throughput
+  2. Write a Python script/service that emits normal server logs every 1–2 seconds.
   3. Implement a **fault injection script** with at least 3 distinct failure scenarios:
-     * **Fault A**: Memory leak / Out-of-Memory (`java.lang.OutOfMemoryError` + RAM spikes to 98%).
-     * **Fault B**: Database connection timeout (Connection pool exhaustion + thread pile-up).
-     * **Fault C**: Cascading HTTP 500 errors (Error rate burst + CPU thrashing).
-* **Handoff Output**: A steady stream of raw text logs and synchronized metric readings.
+     * **Fault A**: Memory leak / Out-of-Memory (`java.lang.OutOfMemoryError`).
+     * **Fault B**: Database connection timeout / pool exhaustion.
+     * **Fault C**: Cascading HTTP 500 error / unauthorized spike.
+* **Handoff Output**: A steady stream or file of raw text logs.
 
 ---
 
-### Step 2: Log Parsing & Vector Embeddings (Text + Metrics)
+### Step 2: Log Parsing & Vector Embeddings
 * **Lead**: Member 1
-* **Objective**: Convert English text and numerical metrics into feature vectors that machine learning algorithms can compute.
+* **Objective**: Convert English text into numerical vectors that machine learning algorithms can compute.
 * **Tasks**:
-  1. (Optional) Parse dynamic parameters (IP addresses, block IDs) using regex or Drain3.
+  1. (Optional) Parse dynamic parameters (IP addresses, IDs) using regex or Drain3.
   2. Use `sentence-transformers` (`all-MiniLM-L6-v2`) to turn each log message into a 384-dimensional list of floats.
-  3. *(Optional / Advanced)*: Concatenate normalized metrics directly onto the vector:
-     $$\text{Combined Vector} = [\underbrace{x_1, \dots, x_{384}}_{\text{Text Embedding}}, \underbrace{\text{CPU}/100}_{\text{Metric 1}}, \underbrace{\text{RAM}/100}_{\text{Metric 2}}]$$
-  4. Produce records conforming strictly to **Contract A.1**:
+  3. Produce records conforming strictly to **Contract A.1**:
      ```json
      {
        "log_id": "log_001",
        "timestamp": "2026-09-22T19:00:00Z",
        "raw_text": "Failed to write block blk_1049281 to datanode",
        "source": "datanode-1",
-       "embedding": [0.012, -0.045, 0.089, "..."],
-       "metrics": {
-         "cpu_percent": 98.4,
-         "memory_percent": 95.2
-       }
+       "embedding": [0.012, -0.045, 0.089, "..."]
      }
      ```
 * **Handoff Output**: Clean preprocessed dataset saved in `data/processed/` for Member 2.
@@ -99,7 +83,7 @@ Imagine you are building a **smart security scout and expert doctor** for comput
 
 ### Step 3: Anomaly Detection Models
 * **Lead**: Member 2
-* **Objective**: Train unsupervised ML models to detect abnormal log patterns and abnormal metric states.
+* **Objective**: Train unsupervised ML models to detect abnormal log patterns.
 * **Tasks**:
   1. **Baseline Model**: Train an `IsolationForest` on normal log embeddings using `scikit-learn`.
   2. **Deep Model**: Implement a PyTorch `Autoencoder` (e.g., 384 $\to$ 128 $\to$ 32 $\to$ 128 $\to$ 384) trained on normal data to minimize reconstruction error.
@@ -119,21 +103,21 @@ Imagine you are building a **smart security scout and expert doctor** for comput
 
 ---
 
-### Step 4: Context Aggregation & LLM Root-Cause Reasoning (Logs + Metrics)
+### Step 4: Context Aggregation & LLM Root-Cause Reasoning
 * **Lead**: Member 3
-* **Objective**: Translate raw anomalous log events and metric spikes into plain English explanations and remediation steps.
+* **Objective**: Translate raw anomalous log events into plain English explanations and remediation steps.
 * **Tasks**:
-  1. **Dual-Context Gathering**: When an anomaly is flagged, collect:
-     * The preceding $N$ logs and subsequent $M$ logs using `context_window` IDs.
-     * The **system metrics snapshot** at that exact timestamp (e.g., CPU = 98.4%, RAM = 95.2%).
-  2. **Prompting the LLM**: Give both the logs and the metrics to the LLM so it correlates physical resource exhaustion with the software crash:
-     > *"Logs: [OutOfMemoryError] | Metrics: [RAM: 95.2%, CPU: 98.4%] -> Reason: Memory exhaustion during garbage collection."*
-  3. Connect to an LLM provider (free local **Ollama** `llama3:8b` or API).
+  1. When an anomaly is flagged, collect the preceding $N$ logs and subsequent $M$ logs using the `context_window` IDs.
+  2. Design a structured prompt demanding strict JSON output.
+  3. Connect to an LLM provider:
+     * **Local (Free & Offline)**: Ollama (`llama3:8b` or `mistral:7b`).
+     * **API-based**: Gemini API or OpenAI API.
+     * *(Use a mock client during early development to avoid rate limits).*
   4. Produce output conforming strictly to **Contract A.3**:
      ```json
      {
        "log_id": "log_001",
-       "explanation": "DataNode failed to write block because system RAM reached 95.2%, causing thread starvation.",
+       "explanation": "DataNode failed to write block due to storage volume exhaustion.",
        "severity": "critical",
        "recommended_actions": [
          "Run disk cleanup on /data partition",

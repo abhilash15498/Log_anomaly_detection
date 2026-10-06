@@ -1,0 +1,10 @@
+2026-10-06T08:59:34.430714Z [INFO] [inventory-service]: Inventory reservation confirmed for item_4153
+2026-10-06T08:59:34.434238Z [INFO] [datanode-3]: Receiving block blk_148199402 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T08:59:34.436526Z [INFO] [payment-service]: Payment processed via gateway provider status=SUCCESS
+2026-10-06T08:59:34.438717Z [INFO] [datanode-3]: Receiving block blk_531414977 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T08:59:34.440214Z [INFO] [datanode-3]: Receiving block blk_412737193 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T08:59:34.442033Z [INFO] [web-gateway]: GET /api/v1/user/profile status=200 duration=18ms
+2026-10-06T08:59:34.443854Z [INFO] [payment-service]: Payment processed via gateway provider status=SUCCESS
+2026-10-06T08:59:34.445574Z [INFO] [inventory-service]: Inventory reservation confirmed for item_5727
+2026-10-06T08:59:34.446882Z [INFO] [order-service]: Order order_65653 created, dispatching payment event
+2026-10-06T08:59:34.448495Z [INFO] [web-gateway]: GET /api/v1/user/profile status=200 duration=18ms

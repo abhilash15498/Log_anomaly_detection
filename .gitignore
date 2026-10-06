@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+
+# Large Datasets and Raw Logs
+HDFS_v1/HDFS.log
+*.npz
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+HDFS_v1/preprocessed/Event_traces.csv
+HDFS_v1/preprocessed/preprocessed_logs.jsonl
+HDFS_v1/preprocessed/sequence_matrix.csv

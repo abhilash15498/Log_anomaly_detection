@@ -1,0 +1,30 @@
+# AI-Driven Infrastructure Monitoring - Dependencies
+# Python 3.10+
+
+# Data Handling & Scientific Computing
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# Schema Validation
+pydantic>=2.0.0
+
+# Natural Language Processing & Vectorization
+sentence-transformers>=2.2.0
+transformers>=4.30.0
+torch>=2.0.0
+
+# Machine Learning
+scikit-learn>=1.2.0
+
+# Metric Sampling & Ingestion
+psutil>=5.9.0
+
+# Web Dashboard
+streamlit>=1.30.0
+
+# Vector Search (Optional / Stretch)
+faiss-cpu>=1.7.0
+
+# Testing & Quality
+pytest>=7.0.0
