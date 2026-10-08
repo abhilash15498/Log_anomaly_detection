@@ -1,0 +1,10 @@
+{
+  "thresholds": {
+    "isolation_forest": 0.0,
+    "kmeans": 0.017821252976108634,
+    "autoencoder": 1.461805445592633e-07
+  },
+  "contamination": 0.05,
+  "n_clusters": 10,
+  "ae_latent_dim": 32
+}
