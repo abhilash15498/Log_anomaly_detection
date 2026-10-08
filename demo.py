@@ -1,4 +1,6 @@
 import time
+import warnings
+warnings.filterwarnings("ignore")
 from src.detection.infer import detect
 
 def run_demo():

@@ -33,11 +33,13 @@ def _load_csv(csv_path: Path) -> pd.DataFrame:
         df["embedding"] = df["embedding"].apply(_parse_embedding)
     return df
 
-def _load_jsonl(jsonl_path: Path) -> pd.DataFrame:
-    # Each line is a JSON object representing a pre‑processed log record
+def _load_jsonl(jsonl_path: Path, limit: Optional[int] = None) -> pd.DataFrame:
+    # Each line is a JSON object representing a pre-processed log record
     records = []
     with open(jsonl_path, "r", encoding="utf-8") as f:
         for line in f:
+            if limit is not None and len(records) >= limit:
+                break
             if line.strip():
                 records.append(json.loads(line))
     df = pd.DataFrame.from_records(records)
@@ -63,11 +65,11 @@ def load_preprocessed(limit: Optional[int] = None, data_path: Optional[Path] = N
     jsonl_file = data_path / "preprocessed_logs.jsonl"
     if csv_file.is_file():
         df = _load_csv(csv_file)
+        if limit is not None:
+            df = df.head(limit)
     elif jsonl_file.is_file():
-        df = _load_jsonl(jsonl_file)
+        df = _load_jsonl(jsonl_file, limit=limit)
     else:
         raise FileNotFoundError("Neither preprocessed_logs.csv nor preprocessed_logs.jsonl found in the processed data directory.")
 
-    if limit is not None:
-        df = df.head(limit)
     return df

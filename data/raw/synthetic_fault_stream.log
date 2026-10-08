@@ -8,3 +8,43 @@
 2026-10-06T08:59:34.445574Z [INFO] [inventory-service]: Inventory reservation confirmed for item_5727
 2026-10-06T08:59:34.446882Z [INFO] [order-service]: Order order_65653 created, dispatching payment event
 2026-10-06T08:59:34.448495Z [INFO] [web-gateway]: GET /api/v1/user/profile status=200 duration=18ms
+2026-10-06T09:55:26.763299+00:00 [INFO] [datanode-3]: Receiving block blk_303110835 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T09:55:27.264956+00:00 [INFO] [web-gateway]: GET /api/v1/user/profile status=200 duration=18ms
+2026-10-06T09:55:27.794405+00:00 [INFO] [web-gateway]: GET /api/v1/products status=200 duration=24ms
+2026-10-06T09:55:28.296756+00:00 [INFO] [datanode-3]: Received block blk_740852221 of size 67108864 successfully
+2026-10-06T09:55:28.799228+00:00 [INFO] [datanode-3]: Receiving block blk_499079761 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T09:55:29.302397+00:00 [INFO] [web-gateway]: GET /api/v1/user/profile status=200 duration=18ms
+2026-10-06T09:55:29.805237+00:00 [INFO] [datanode-3]: Received block blk_728212742 of size 67108864 successfully
+2026-10-06T09:55:30.308313+00:00 [INFO] [auth-service]: Token validated successfully for user_id=840
+2026-10-06T09:55:30.810168+00:00 [INFO] [inventory-service]: Inventory reservation confirmed for item_7507
+2026-10-06T09:55:31.314004+00:00 [WARN] [order-service]: JVM Old Gen memory usage crossed 88% threshold (Heap: 3.8GB / 4.0GB)
+2026-10-06T09:55:31.818038+00:00 [WARN] [order-service]: Full GC invocation took 3120ms; reclaimed only 12MB
+2026-10-06T09:55:32.321491+00:00 [ERROR] [order-service]: java.lang.OutOfMemoryError: Java heap space at com.app.order.OrderBuffer.allocate(OrderBuffer.java:184)
+2026-10-06T09:55:32.823992+00:00 [CRITICAL] [order-service]: Worker thread thread-pool-exec-4 died abruptly due to unhandled OutOfMemoryError
+2026-10-06T09:55:33.327144+00:00 [ERROR] [web-gateway]: Upstream server order-service:8080 unreachable (Connection reset by peer)
+2026-10-06T09:55:33.829685+00:00 [INFO] [datanode-3]: Receiving block blk_589637878 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T09:55:34.332029+00:00 [INFO] [datanode-3]: Receiving block blk_269491940 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T09:55:34.834171+00:00 [INFO] [datanode-3]: Receiving block blk_440538614 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-06T09:55:35.336432+00:00 [INFO] [payment-service]: Payment processed via gateway provider status=SUCCESS
+2026-10-06T09:55:35.839260+00:00 [INFO] [web-gateway]: GET /api/v1/user/profile status=200 duration=18ms
+2026-10-06T09:55:36.341681+00:00 [INFO] [web-gateway]: GET /api/v1/products status=200 duration=24ms
+2026-10-07T13:28:15.553013+00:00 [INFO] [datanode-3]: Received block blk_493034284 of size 67108864 successfully
+2026-10-07T13:28:16.054908+00:00 [INFO] [auth-service]: Token validated successfully for user_id=583
+2026-10-07T13:28:16.558266+00:00 [INFO] [inventory-service]: Inventory reservation confirmed for item_1184
+2026-10-07T13:28:17.061505+00:00 [INFO] [payment-service]: Payment processed via gateway provider status=SUCCESS
+2026-10-07T13:28:17.563481+00:00 [INFO] [order-service]: Order order_94595 created, dispatching payment event
+2026-10-07T13:28:18.066914+00:00 [INFO] [payment-service]: Payment processed via gateway provider status=SUCCESS
+2026-10-07T13:28:18.568937+00:00 [INFO] [auth-service]: Token validated successfully for user_id=853
+2026-10-07T13:28:19.072016+00:00 [INFO] [auth-service]: Token validated successfully for user_id=524
+2026-10-07T13:28:19.574395+00:00 [INFO] [auth-service]: Token validated successfully for user_id=481
+2026-10-07T13:28:20.078960+00:00 [WARN] [order-service]: JVM Old Gen memory usage crossed 88% threshold (Heap: 3.8GB / 4.0GB)
+2026-10-07T13:28:20.582534+00:00 [WARN] [order-service]: Full GC invocation took 3120ms; reclaimed only 12MB
+2026-10-07T13:28:21.084412+00:00 [ERROR] [order-service]: java.lang.OutOfMemoryError: Java heap space at com.app.order.OrderBuffer.allocate(OrderBuffer.java:184)
+2026-10-07T13:28:21.587123+00:00 [CRITICAL] [order-service]: Worker thread thread-pool-exec-4 died abruptly due to unhandled OutOfMemoryError
+2026-10-07T13:28:22.091692+00:00 [ERROR] [web-gateway]: Upstream server order-service:8080 unreachable (Connection reset by peer)
+2026-10-07T13:28:22.594375+00:00 [INFO] [datanode-3]: Received block blk_307598540 of size 67108864 successfully
+2026-10-07T13:28:23.100831+00:00 [INFO] [datanode-3]: Receiving block blk_271856850 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-07T13:28:23.603417+00:00 [INFO] [order-service]: Order order_93578 created, dispatching payment event
+2026-10-07T13:28:24.106723+00:00 [INFO] [order-service]: Order order_77707 created, dispatching payment event
+2026-10-07T13:28:24.609765+00:00 [INFO] [datanode-3]: Receiving block blk_807314925 src: /10.0.1.12:4321 dest: /10.0.1.20:50010
+2026-10-07T13:28:25.113953+00:00 [INFO] [datanode-3]: Receiving block blk_666443412 src: /10.0.1.12:4321 dest: /10.0.1.20:50010

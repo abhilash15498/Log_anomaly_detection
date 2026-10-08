@@ -48,12 +48,30 @@ def train_all(limit: int = None, contamination: float = 0.05, n_clusters: int = 
     iso_thr = select_threshold(iso_scores, percentile=95)
     km_thr = select_threshold(km_scores, percentile=95)
     ae_thr = select_threshold(ae_scores, percentile=95)
+    # Save raw and normalized thresholds
+    def _norm(val, s_min, s_max):
+        return float(np.clip((val - s_min) / (s_max - s_min + 1e-8), 0.0, 1.0))
+
+    stats = {
+        "isolation_forest": {"min": float(iso_scores.min()), "max": float(iso_scores.max())},
+        "kmeans": {"min": float(km_scores.min()), "max": float(km_scores.max())},
+        "autoencoder": {"min": float(ae_scores.min()), "max": float(ae_scores.max())},
+    }
+
+    norm_thresholds = {
+        "isolation_forest": _norm(iso_thr, iso_scores.min(), iso_scores.max()),
+        "kmeans": _norm(km_thr, km_scores.min(), km_scores.max()),
+        "autoencoder": _norm(ae_thr, ae_scores.min(), ae_scores.max()),
+    }
+
     config = {
         "thresholds": {
             "isolation_forest": iso_thr,
             "kmeans": km_thr,
             "autoencoder": ae_thr,
         },
+        "norm_thresholds": norm_thresholds,
+        "stats": stats,
         "contamination": contamination,
         "n_clusters": n_clusters,
         "ae_latent_dim": ae_latent,

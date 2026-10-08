@@ -1,8 +1,27 @@
 {
   "thresholds": {
     "isolation_forest": 0.0,
-    "kmeans": 0.017821252976108634,
-    "autoencoder": 1.461805445592633e-07
+    "kmeans": 0.49855278859874735,
+    "autoencoder": 0.0006466215186707092
+  },
+  "norm_thresholds": {
+    "isolation_forest": 0.8402429710708892,
+    "kmeans": 0.438008499775318,
+    "autoencoder": 0.3007829092187167
+  },
+  "stats": {
+    "isolation_forest": {
+      "min": -0.09212727011816352,
+      "max": 0.017516326897968226
+    },
+    "kmeans": {
+      "min": 0.0,
+      "max": 1.1382262775137955
+    },
+    "autoencoder": {
+      "min": 1.5941203221099323e-10,
+      "max": 0.0021497843779009597
+    }
   },
   "contamination": 0.05,
   "n_clusters": 10,
