@@ -1,0 +1,67 @@
+[
+  {
+    "log_id": "log_0000032",
+    "explanation": "Distributed filesystem storage block allocation anomaly: Unusual block replica request rate or delayed block report acknowledged by NameNode.",
+    "severity": "medium",
+    "recommended_actions": [
+      "Run 'hdfs fsck /' to check distributed filesystem block health and replica placement.",
+      "Inspect DataNode network throughput and verify dfs.datanode.failed.volumes.tolerated.",
+      "Review concurrent MapReduce or Spark writer job scheduling."
+    ],
+    "retrieved_context": [
+      "Known Pattern: HDFS_BLOCK_ALLOCATION_DEVIATION"
+    ]
+  },
+  {
+    "log_id": "log_0000272",
+    "explanation": "Distributed filesystem storage block allocation anomaly: Unusual block replica request rate or delayed block report acknowledged by NameNode.",
+    "severity": "medium",
+    "recommended_actions": [
+      "Run 'hdfs fsck /' to check distributed filesystem block health and replica placement.",
+      "Inspect DataNode network throughput and verify dfs.datanode.failed.volumes.tolerated.",
+      "Review concurrent MapReduce or Spark writer job scheduling."
+    ],
+    "retrieved_context": [
+      "Known Pattern: HDFS_BLOCK_ALLOCATION_DEVIATION"
+    ]
+  },
+  {
+    "log_id": "log_0000275",
+    "explanation": "Distributed filesystem storage block allocation anomaly: Unusual block replica request rate or delayed block report acknowledged by NameNode.",
+    "severity": "medium",
+    "recommended_actions": [
+      "Run 'hdfs fsck /' to check distributed filesystem block health and replica placement.",
+      "Inspect DataNode network throughput and verify dfs.datanode.failed.volumes.tolerated.",
+      "Review concurrent MapReduce or Spark writer job scheduling."
+    ],
+    "retrieved_context": [
+      "Known Pattern: HDFS_BLOCK_ALLOCATION_DEVIATION"
+    ]
+  },
+  {
+    "log_id": "log_0000276",
+    "explanation": "Distributed filesystem storage block allocation anomaly: Unusual block replica request rate or delayed block report acknowledged by NameNode.",
+    "severity": "medium",
+    "recommended_actions": [
+      "Run 'hdfs fsck /' to check distributed filesystem block health and replica placement.",
+      "Inspect DataNode network throughput and verify dfs.datanode.failed.volumes.tolerated.",
+      "Review concurrent MapReduce or Spark writer job scheduling."
+    ],
+    "retrieved_context": [
+      "Known Pattern: HDFS_BLOCK_ALLOCATION_DEVIATION"
+    ]
+  },
+  {
+    "log_id": "log_0000278",
+    "explanation": "Distributed filesystem storage block allocation anomaly: Unusual block replica request rate or delayed block report acknowledged by NameNode.",
+    "severity": "medium",
+    "recommended_actions": [
+      "Run 'hdfs fsck /' to check distributed filesystem block health and replica placement.",
+      "Inspect DataNode network throughput and verify dfs.datanode.failed.volumes.tolerated.",
+      "Review concurrent MapReduce or Spark writer job scheduling."
+    ],
+    "retrieved_context": [
+      "Known Pattern: HDFS_BLOCK_ALLOCATION_DEVIATION"
+    ]
+  }
+]

@@ -1,49 +1,56 @@
+import os
 import time
 import warnings
 warnings.filterwarnings("ignore")
+
+from pathlib import Path
+from dotenv import load_dotenv
+
+_env_file = Path(__file__).resolve().parent / ".env"
+if _env_file.is_file():
+    load_dotenv(dotenv_path=_env_file)
+
 from src.detection.infer import detect
+from src.llm.diagnose import diagnose_anomaly
 
 def run_demo():
-    print("=" * 60)
-    print("=== AI-Driven Infrastructure Monitoring - Detection Demo ===")
-    print("=" * 60)
-    
-    print("\n[1/3] Loading pre-processed log data and trained models...")
+    print("\n" + "=" * 65)
+    print("      AI INFRASTRUCTURE MONITORING & INCIDENT DIAGNOSIS")
+    print("=" * 65)
+
+    print("\n[+] Scanning system logs with ML detection ensemble...")
     start_time = time.time()
     
-    # We load a subset of 1000 logs just to make the demo run instantly, 
-    # but you can remove limit=1000 to process the entire dataset.
+    # Process sample logs
     results = detect(limit=1000) 
-    
     elapsed = time.time() - start_time
-    print(f"      Done in {elapsed:.2f} seconds.\n")
     
-    # Count anomalies
-    total_logs = len(results)
     anomalous_logs = [r for r in results if r.is_anomaly]
-    anomaly_count = len(anomalous_logs)
+    print(f"    Scanned {len(results):,} logs in {elapsed:.2f}s | Flagged {len(anomalous_logs)} critical incidents\n")
     
-    print(f"[2/3] Analyzing results...")
-    print(f"      Total Logs Analyzed : {total_logs}")
-    print(f"      Anomalies Detected  : {anomaly_count}")
-    print(f"      Anomaly Rate        : {(anomaly_count/total_logs)*100:.2f}%\n")
+    print("=" * 65)
+    print("                      TOP INCIDENT REPORTS")
+    print("=" * 65)
     
-    print("[3/3] Displaying Top 3 Anomalous Events:")
-    print("-" * 60)
-    
-    # Sort anomalies by score (highest first) to show the most critical ones
     anomalous_logs.sort(key=lambda x: x.anomaly_score, reverse=True)
     
-    for i, anomaly in enumerate(anomalous_logs[:3]):
-        print(f"[!] Anomaly #{i+1}")
-        print(f"   Log ID    : {anomaly.log_id}")
-        print(f"   Severity  : {anomaly.anomaly_score:.4f} (Threshold: {anomaly.threshold_used:.4f})")
-        print(f"   Context   :")
-        for line in anomaly.context_window:
-            # Highlight the actual anomaly line
-            prefix = "      >> " if line == anomaly.context_window[len(anomaly.context_window)//2] else "         "
+    for i, anomaly in enumerate(anomalous_logs[:3], 1):
+        report = diagnose_anomaly(anomaly)
+
+        print(f"\n[INCIDENT #{i}] - ID: {anomaly.log_id}")
+        print(f"Severity    : {report.severity.upper()}")
+        print(f"Diagnosis   : {report.explanation}")
+        
+        print("\nRelevant Log Sequence:")
+        mid_idx = len(anomaly.context_window) // 2
+        for idx, line in enumerate(anomaly.context_window):
+            prefix = "  >> " if idx == mid_idx else "     "
             print(f"{prefix}{line}")
-        print("-" * 60)
+        
+        print("\nRecommended Fix:")
+        for step_num, action in enumerate(report.recommended_actions, 1):
+            print(f"  {step_num}. {action}")
+        print("-" * 65)
 
 if __name__ == "__main__":
     run_demo()

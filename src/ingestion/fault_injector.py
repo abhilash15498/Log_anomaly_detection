@@ -159,7 +159,7 @@ def stream_logs(
     for i in range(1, total_events + 1):
         if i == inject_fault_at:
             in_fault = True
-            print(f"\n🚨 [INJECTING FAULT {fault_type}: {FAULT_TEMPLATES[fault_type]['name']}] 🚨")
+            print(f"\n[!] [INJECTING FAULT {fault_type}: {FAULT_TEMPLATES[fault_type]['name']}] [!]")
 
         if in_fault:
             event = generate_log_event(fault_type=fault_type, fault_index=fault_step)
