@@ -58,12 +58,13 @@ def build_analysis_prompt(
 
     prompt = f"""[INCIDENT EVALUATION REQUEST]
 Target Log ID: {log_id}
-Anomaly Score: {anomaly_score:.4f} (Detector Cutoff: {threshold_used:.4f})
+Detection Status: Confirmed Anomaly (Multi-Model Ensemble Consensus)
+Anomaly Deviation Score: {anomaly_score:.4f}
 {metrics_str}
-Chronological Context Window (5 logs):
+Chronological Context Window (5 sequential logs):
 {formatted_context}
 
-Analyze this incident. Return your assessment strictly in the required JSON format.
+Analyze this incident. Identify the root cause, assess severity (critical/high/medium/low), and provide concrete remediation actions. Return your assessment strictly in the required JSON format.
 """
     return prompt
 

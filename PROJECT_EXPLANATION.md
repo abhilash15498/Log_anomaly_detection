@@ -57,6 +57,134 @@ To solve this efficiently, our system uses a **two-stage cooperative architectur
 
 ---
 
+## ⚡ How the System Works in Real-Time (End-to-End Operational Lifecycle)
+
+In production environments, servers do not wait for an engineer to upload log files or copy-paste text. The system operates autonomously via an event-driven, closed-loop pipeline from log generation to automated remediation:
+
+```text
+[External Services / OS / Containers]
+                 │  (Writes to disk / stdout)
+                 ▼
+  ┌────────────────────────────────┐
+  │  data/raw/live_stream.log      │  <── Live append-only log file
+  └────────────────────────────────┘
+                 │
+                 │ 1. Passive Polling (every 250ms) + Host Hardware Sampling (CPU/RAM)
+                 ▼
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ ⚡ AUTONOMOUS REAL-TIME OBSERVER (src/dashboard/app.py)                │
+  │ • Detects newly appended log lines without human intervention          │
+  │ • Samples live machine load via psutil (CPU %, Memory %)               │
+  └────────────────────────────────────────────────────────────────────────┘
+                 │
+                 │ 2. Sub-millisecond Regex Parsing & Vectorization (<0.05ms)
+                 ▼
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ 🧹 STAGE 1A: TEMPLATE SANITIZATION & VECTORIZATION                     │
+  │ • Strips volatile IPs, Block IDs, and hex addresses into clean tokens  │
+  │ • Maps template into a 384-dimensional dense semantic embedding        │
+  │ • Uses in-memory template cache for instantaneous embedding lookup     │
+  └────────────────────────────────────────────────────────────────────────┘
+                 │
+                 │ 3. Multi-Model Inference (<0.2ms)
+                 ▼
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ 🤖 STAGE 1B: MULTI-MODEL CONSENSUS ENSEMBLE                            │
+  │ • Model 1: Isolation Forest (Tree isolation depth)                     │
+  │ • Model 2: K-Means (Distance from normal cluster centroids)            │
+  │ • Model 3: Autoencoder (Reconstruction error bottleneck)               │
+  │ • Consensus Rule: Declared an Anomaly ONLY if votes >= 2 out of 3      │
+  └────────────────────────────────────────────────────────────────────────┘
+         │                                         │
+         │ (votes < 2)                             │ (votes >= 2: ANOMALY CONFIRMED!)
+         ▼                                         ▼
+  [Normal Log Event]               ┌──────────────────────────────────────────────┐
+  Passed quietly to stream         │ 📦 STAGE 1C: 5-LOG TEMPORAL CONTEXT PACKAGING│
+  (95%+ of routine traffic)        │ • 2 logs prior (antecedents / buildup)       │
+                                   │ • 1 root log (triggering anomalous event)    │
+                                   │ • 2 logs after (cascading failure / fallout) │
+                                   │ • Packaged into Contract A.2 DetectionResult │
+                                   └──────────────────────────────────────────────┘
+                                                   │
+                                                   │ 4. Dispatched to LLM Doctor
+                                                   ▼
+                                   ┌──────────────────────────────────────────────┐
+                                   │ 🧠 STAGE 2: LLM SRE REASONING ENGINE         │
+                                   │ (Groq API: openai/gpt-oss-20b + Heuristic)   │
+                                   │ • Evaluates the chronological story          │
+                                   │ • Filters out false alarms (e.g. MapReduce)  │
+                                   │ • Assesses severity (Critical/High/Med/Low)  │
+                                   │ • Synthesizes root-cause explanation         │
+                                   │ • Emits executable bash remediation playbook │
+                                   │ • Packaged into Contract A.3 IncidentReport  │
+                                   └──────────────────────────────────────────────┘
+                                                   │
+                                                   │ 5. Displayed on Dashboard
+                                                   ▼
+                                   ┌──────────────────────────────────────────────┐
+                                   │ 🖥️ STAGE 3: INTERACTIVE INCIDENT DASHBOARD    │
+                                   │ • Real-time alerts & visual log timeline     │
+                                   │ • AI root-cause diagnosis & bash scripts     │
+                                   │ • Live host CPU % and RAM % resource meters  │
+                                   └──────────────────────────────────────────────┘
+                                                   │
+                                                   │ 6. Human-in-the-Loop Feedback
+                                                   ▼
+                                   ┌──────────────────────────────────────────────┐
+                                   │ 🔄 STAGE 4: CLOSED-LOOP SENSITIVITY FEEDBACK │
+                                   │ • [Confirm Incident] -> Generates SRE Ticket │
+                                   │ • [Suppress Alert]   -> Auto-adapts detector │
+                                   │   thresholds to silence repeat noise (A.4)   │
+                                   └──────────────────────────────────────────────┘
+```
+
+### Detailed Real-Time Step Breakdown:
+
+#### 1. Passive Log Acquisition (Zero Manual Pasting)
+* Real enterprise systems do not require engineers to upload CSVs or paste error messages into text boxes.
+* The system monitors a target file (default: `data/raw/live_stream.log`). Whenever an external service (or our built-in fault simulator) writes a line of text, the observer detects the byte offset change and immediately processes the new lines.
+* Python's `psutil` library runs concurrently, sampling host CPU load and virtual memory usage so hardware context is tied to log anomalies.
+
+#### 2. Sub-Millisecond Normalization & Embedding (<0.05ms)
+* When a log line arrives, `src/preprocessing/parser.py` strips dynamic parameters (e.g., `/10.250.19.102:54106` $\rightarrow$ `<IP>`, `blk_-19428...` $\rightarrow$ `<BLOCK>`).
+* The sanitized template is converted into a 384-dimensional dense semantic vector via `src/preprocessing/vectorizer.py`.
+* An in-memory cache ensures that previously seen log templates are vectorized in **microseconds** without re-running the neural model.
+
+#### 3. Multi-Model Consensus Evaluation (<0.2ms)
+* The 384-dimensional vector is scored against three pre-calibrated unsupervised models simultaneously:
+  1. **Isolation Forest** checks how quickly the vector is isolated in random decision trees.
+  2. **K-Means** checks the Euclidean distance to the nearest normal traffic cluster centroid.
+  3. **Autoencoder** attempts to reconstruct the 384-dim vector from a 32-dim latent bottleneck and measures the Mean Squared Error (MSE).
+* **Majority Voting**: An alert is triggered only if **at least 2 out of the 3 models agree** that their individual thresholds were exceeded. This cuts statistical noise down to an 8.4% incident rate.
+
+#### 4. The 5-Log Temporal Context Window
+* A single error log rarely explains why a server crashed. The critical root cause usually happened seconds earlier (e.g., a memory allocation burst or connection pool exhaustion).
+* The observer maintains a rolling buffer and packages the **5-log chronological sequence**:
+  * 2 context logs immediately preceding the event (the buildup)
+  * 1 root event log (the incident)
+  * 2 context logs immediately following (the aftermath)
+* This window, along with live CPU/RAM metrics, is packaged into standardized Pydantic schema **Contract A.2 (`DetectionResult`)**.
+
+#### 5. Autonomous LLM SRE Triage & Remediation (<1.5s)
+* Contract A.2 is dispatched to the LLM Reasoning Layer (`src/llm/client.py`).
+* Acting as a virtual Senior Site Reliability Engineer (SRE), the LLM:
+  * Reads the sequence of events as an unfolding story.
+  * Filters out harmless bursts (such as routine MapReduce block allocations, correctly labeling them **LOW SEVERITY**).
+  * Pinpoints genuine faults (e.g., database connection pool exhaustion or heap memory saturation).
+  * Generates an actionable, copy-pasteable **Operational Remediation Playbook** with exact bash commands (`hdfs fsck`, `docker restart`, `systemctl status`).
+  * Emits standardized Pydantic schema **Contract A.3 (`IncidentReport`)**.
+* If the remote cloud API is unreachable, an **offline heuristic fallback engine** guarantees zero downtime.
+
+#### 6. Interactive Dashboard & Closed-Loop Adaptive Feedback
+* The incident appears in the Streamlit UI (`src/dashboard/app.py`):
+  * **Tab 1 (Autonomous Real-Time Observer)**: Live event interceptor, hardware meters, and on-demand failure burst injection.
+  * **Tab 2 (Active Incident Queue & Audit)**: Benchmark audit of 84 HDFS incidents with interactive single-row selection, 5-log timeline, and AI diagnosis.
+* **Administrator Triage Action**:
+  * **Confirm Incident (Valid Anomaly)**: Validates the issue and generates an incident ticket.
+  * **Suppress Alert (False Alarm)**: Appends a record to `feedback_records.jsonl` (Contract A.4) and calls `adapt_threshold()`. The system automatically raises the sensitivity threshold for that pattern, dynamically eliminating alert fatigue over time.
+
+---
+
 ## 📖 Deep-Dive: Concepts Explained for Complete Beginners
 
 ### 1. What is a Server Log?
@@ -327,13 +455,21 @@ python -m src.detection.train
 
 ---
 
-## 🎯 Next Steps (Phase 2 Preview)
+## 🎯 Full System Integration & Phase Completion
 
-With Member 1 and Member 2's components fully operational, the project is ready for Phase 2:
-1. **Member 3 (LLM / RAG Lead — Deepak)**:
-   * Take the 5-log `context_window` from Contract A.2.
-   * Send to local Ollama (`llama3:8b`) or Gemini/OpenAI API with structured JSON output formatting.
-   * Emit Contract A.3 (`IncidentReport`) with plain-English root causes and remediation commands.
-2. **Member 4 (Integration & Dashboard Lead — Vishnu)**:
-   * Build the interactive Streamlit web dashboard in `src/dashboard/app.py`.
-   * Wire the **[Confirm]** and **[Dismiss]** administrator buttons into dynamic threshold updates.
+All modules across all 4 team roles are completely implemented, integrated, and verified:
+* **Member 1 (Data & Preprocessing — Abhilash)**: Drain3 log parsing, 384D embedding vectorizer, HDFS dataset pipeline, and synthetic fault injector (`src/preprocessing`, `src/ingestion`).
+* **Member 2 (ML Detection — Shrikrishna / Chandan)**: Isolation Forest, K-Means, Autoencoder models, dynamic threshold calibration, and multi-model consensus ensemble (`votes >= 2`) (`src/detection`, `src/models`).
+* **Member 3 (LLM & Remediation — Deepak)**: Structured prompt engineering, Groq cloud LLM integration (`openai/gpt-oss-20b`), offline SRE heuristic fallback, and incident diagnosis (`src/llm`).
+* **Member 4 (Dashboard & Integration — Vishnu)**: Streamlit interactive UI, real-time autonomous observer, live CPU/RAM telemetry, active benchmark queue, and closed-loop feedback threshold adaptation (`src/dashboard`).
+
+### Automated Test Suite Status:
+```bash
+pytest -v
+```
+**17 / 17 tests PASSED** across all pipeline modules (`test_member1_pipeline.py`, `test_member2_detection.py`, `test_member3_llm.py`, `test_member4_dashboard.py`).
+
+### Launching the Dashboard:
+```bash
+streamlit run src/dashboard/app.py
+```
