@@ -176,9 +176,16 @@ with tab_observer:
     if clear_btn:
         with open(default_log_abs, "w", encoding="utf-8") as f:
             f.write("2026-11-17 12:00:00 [INFO] [system-init]: Infrastructure log monitor initialized.\n")
-        st.success("Log stream baseline reset successfully.")
-        time.sleep(0.4)
+        if "Tail Monitored" in stream_mode and active_file_path != default_log_abs and active_file_path.exists():
+            with open(active_file_path, "w", encoding="utf-8") as f:
+                f.write("2026-11-17 12:00:00 [INFO] [system-init]: Infrastructure log monitor initialized.\n")
+        st.session_state["reset_confirmed"] = True
         st.rerun()
+
+    if st.session_state.get("reset_confirmed"):
+        st.success("🧹 **Stream Baseline Reset Successfully!** All past errors and traffic bursts have been completely wiped from disk.")
+        st.markdown("<div class='log-row log-normal'>🟢 <b>[CLEAN BASELINE ON DISK]</b> 2026-11-17 12:00:00 [INFO] [system-init]: Infrastructure log monitor initialized. (0 anomalies, 100% healthy)</div>", unsafe_allow_html=True)
+        st.session_state["reset_confirmed"] = False
 
     # Live Monitoring Loop
     if start_monitor:
