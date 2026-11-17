@@ -23,6 +23,10 @@ psutil>=5.9.0
 # Web Dashboard
 streamlit>=1.30.0
 
+# LLM & Cloud Reasoning
+groq>=0.9.0
+python-dotenv>=1.0.0
+
 # Vector Search (Optional / Stretch)
 faiss-cpu>=1.7.0
 

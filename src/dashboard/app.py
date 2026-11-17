@@ -21,7 +21,7 @@ import time
 from src.detection.infer import detect, _load_config
 from src.llm.diagnose import diagnose_anomaly
 from src.ingestion.fault_injector import generate_log_event, FAULT_TEMPLATES
-from src.dashboard.feedback import save_feedback, get_feedback_summary, adapt_threshold
+from src.dashboard.feedback import save_feedback, get_feedback_summary, adapt_threshold, persist_adapted_thresholds
 from src.preprocessing.parser import parse_log_line
 from src.preprocessing.vectorizer import LogVectorizer
 from src.detection.baseline import load_isolation_forest, load_kmeans, isolation_forest_score, kmeans_score
@@ -182,12 +182,12 @@ with tab_observer:
             if selected_fault == "D":
                 for _ in range(5):
                     ev = generate_log_event()
-                    f.write(f"{ev['timestamp']} [INFO] [order-service]: {ev['raw_text']}\n")
+                    f.write(f"{ev['raw_text']}\n")
                 st.success("Appended 5 normal service events to log file.")
             else:
                 for idx, line in enumerate(FAULT_TEMPLATES[selected_fault]["logs"]):
                     ev = generate_log_event(fault_type=selected_fault, fault_index=idx)
-                    f.write(f"{ev['timestamp']} [{ev['raw_text'].split()[2].strip('[]')}] {ev['raw_text']}\n")
+                    f.write(f"{ev['raw_text']}\n")
                 st.warning(f"Appended failure burst ({FAULT_TEMPLATES[selected_fault]['name']}) to log file.")
 
     # Live Monitoring Loop
@@ -456,6 +456,7 @@ with tab_audit:
         with col_btn1:
             if st.button("✅ Confirm Incident (Valid Anomaly)", key=f"btn_conf_{active_anomaly.log_id}", use_container_width=True):
                 save_feedback(active_anomaly.log_id, "confirmed")
+                persist_adapted_thresholds()
                 st.success("Incident confirmed. SRE incident ticket generated.")
                 time.sleep(0.5)
                 st.rerun()
@@ -463,6 +464,8 @@ with tab_audit:
         with col_btn2:
             if st.button("❌ Suppress Alert (Mark False Alarm)", key=f"btn_dism_{active_anomaly.log_id}", use_container_width=True):
                 save_feedback(active_anomaly.log_id, "dismissed")
-                st.warning("Alert suppressed. Detection sensitivity automatically adapted to suppress repeat noise.")
+                new_cutoff = persist_adapted_thresholds()
+                cutoff_txt = f" (Threshold adapted to {new_cutoff:.4f})" if new_cutoff else ""
+                st.warning(f"Alert suppressed. Detection sensitivity automatically adapted{cutoff_txt}.")
                 time.sleep(0.5)
                 st.rerun()

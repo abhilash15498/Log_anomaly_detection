@@ -8,7 +8,7 @@ dynamic threshold adaptation, and pipeline integration.
 from pathlib import Path
 import pytest
 from src.schemas import FeedbackRecord
-from src.dashboard.feedback import save_feedback, load_feedback, get_feedback_summary, adapt_threshold
+from src.dashboard.feedback import save_feedback, load_feedback, get_feedback_summary, adapt_threshold, persist_adapted_thresholds
 
 
 def test_feedback_record_contract_a4(tmp_path):
@@ -56,6 +56,24 @@ def test_dynamic_threshold_adaptation():
     ]
     adapted_lower = adapt_threshold(base, feedback_records=confirmations, learning_rate=0.02)
     assert adapted_lower < base
+
+
+def test_persist_adapted_thresholds(tmp_path):
+    import json
+    cfg_file = tmp_path / "test_config.json"
+    with open(cfg_file, "w", encoding="utf-8") as f:
+        json.dump({"consensus_cutoff": 0.50}, f)
+
+    fb_file = tmp_path / "feedback.jsonl"
+    save_feedback("log_test", "dismissed", feedback_file=fb_file)
+
+    new_cutoff = persist_adapted_thresholds(config_path=cfg_file, feedback_file=fb_file, learning_rate=0.05)
+    assert new_cutoff is not None
+    assert new_cutoff > 0.50
+
+    with open(cfg_file, "r", encoding="utf-8") as f:
+        saved_cfg = json.load(f)
+    assert saved_cfg["consensus_cutoff"] == new_cutoff
 
 
 def test_integration_pipeline_wiring():

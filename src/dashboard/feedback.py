@@ -92,3 +92,36 @@ def adapt_threshold(
     adapted = max(0.1, min(0.95, base_threshold + adjustment))
     return round(adapted, 4)
 
+
+CONFIG_FILE = Path(__file__).resolve().parents[1] / "models" / "config.json"
+
+
+def persist_adapted_thresholds(
+    config_path: Optional[Path] = None,
+    feedback_file: Optional[Path] = None,
+    learning_rate: float = 0.02
+) -> Optional[float]:
+    """
+    Calculates adapted threshold from feedback and persists it directly into config.json.
+    Closes the human-in-the-loop adaptation cycle.
+    """
+    cfg_file = config_path or CONFIG_FILE
+    if not cfg_file.exists():
+        return None
+
+    try:
+        with open(cfg_file, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+
+        current_cutoff = cfg.get("consensus_cutoff", 0.50)
+        records = load_feedback(feedback_file)
+        new_cutoff = adapt_threshold(current_cutoff, feedback_records=records, learning_rate=learning_rate)
+        cfg["consensus_cutoff"] = new_cutoff
+
+        with open(cfg_file, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2)
+
+        return new_cutoff
+    except Exception:
+        return None
+
